@@ -2,20 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet dark map fix */
-.leaflet-container {
-  background: #1e293b;
+/* ── Custom utilities ── */
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out both;
+  }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-::-webkit-scrollbar-track {
+
+/* ── Leaflet ── */
+.leaflet-container {
+  background: #0f172a;
+}
+.leaflet-popup-content-wrapper {
+  background: #1e293b;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+}
+.leaflet-popup-tip {
   background: #1e293b;
 }
+.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
   background: #475569;
-  border-radius: 3px;
+}
+
+/* ── Range input ── */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #6366f1 0%,
+    #6366f1 var(--range-pct, 0%),
+    #334155 var(--range-pct, 0%),
+    #334155 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #0f172a;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+input[type='range']::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.22);
+}
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #0f172a;
+  cursor: pointer;
+}
+
+/* ── Map draw-mode cursor ── */
+.map-draw-mode .leaflet-container,
+.map-draw-mode .leaflet-container * {
+  cursor: crosshair !important;
 }

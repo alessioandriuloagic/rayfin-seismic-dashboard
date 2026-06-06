@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useEarthquakeSync } from '../hooks/useEarthquakeSync.js';
 import { useEarthquakes } from '../hooks/useEarthquakes.js';
 import { useAuth } from '../hooks/useAuth.js';
@@ -6,98 +6,155 @@ import { StatsBar } from './StatsBar.js';
 import { EarthquakeMap } from './EarthquakeMap.js';
 import { EarthquakeTable } from './EarthquakeTable.js';
 import { MagnitudeHistogram, DepthScatter } from './MagnitudeChart.js';
+import { FilterPanel, DEFAULT_FILTERS, applyFilters } from './FilterPanel.js';
+import type { FilterState, BBox } from './FilterPanel.js';
 
 export function Dashboard() {
   const { email, signOut } = useAuth();
   const syncState = useEarthquakeSync();
 
-  // Bump this counter to trigger a re-fetch after a sync
   const [refreshTick, setRefreshTick] = useState(0);
   useEffect(() => {
     if (syncState.lastSync) setRefreshTick((t) => t + 1);
   }, [syncState.lastSync]);
 
   const { earthquakes, loading, error } = useEarthquakes(refreshTick);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+
+  const handleBboxChange = useCallback((bbox: BBox | null) => {
+    setFilters((f) => ({ ...f, bbox }));
+  }, []);
+
+  const filtered = applyFilters(earthquakes, filters);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-[#0b0f1a] text-white">
       {/* ── Header ── */}
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#0b0f1a]/80 backdrop-blur-md px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🌍</span>
+          <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <svg
+              className="w-4 h-4 text-indigo-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                d="M2 12h2l2-6 3 12 3-8 2 4 2-2h6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
           <div>
-            <h1 className="text-lg font-bold leading-tight">Seismic Dashboard</h1>
+            <h1 className="text-sm font-bold leading-tight text-white tracking-tight">
+              Seismic Dashboard
+            </h1>
             <p className="text-xs text-slate-500">
-              Italy · INGV FDSN API → Rayfin (Microsoft Fabric)
+              Italy · INGV FDSN API → Rayfin · Microsoft Fabric
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-slate-400 hidden sm:block">{email}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-500 hidden sm:block">{email}</span>
           <button
             onClick={signOut}
-            className="rounded-lg bg-slate-700 hover:bg-slate-600 px-3 py-1.5 text-slate-300 transition"
+            className="rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 transition-all"
           >
             Sign out
           </button>
         </div>
       </header>
 
-      {/* ── Main content ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      {/* ── Main ── */}
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 py-5 space-y-4">
+        {/* Filter panel */}
+        <FilterPanel
+          filters={filters}
+          onChange={setFilters}
+          earthquakeCount={filtered.length}
+          totalCount={earthquakes.length}
+        />
+
         {/* Stats */}
         <StatsBar
-          earthquakes={earthquakes}
+          earthquakes={filtered}
           syncState={syncState}
           onSyncNow={syncState.syncNow}
         />
 
         {/* Error banner */}
         {(error || syncState.error) && (
-          <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-xl bg-red-950/40 border border-red-800/60 px-4 py-3 text-sm text-red-300">
             {error || syncState.error}
           </div>
         )}
 
-        {/* Map */}
-        {loading ? (
-          <div className="rounded-xl bg-slate-800 h-[420px] flex items-center justify-center text-slate-500">
-            Loading map…
+        {/* Map + Charts side by side on large screens */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
+          <div className="xl:col-span-3">
+            {loading ? (
+              <div className="rounded-xl bg-slate-800/60 border border-slate-700/60 h-[440px] flex items-center justify-center">
+                <div className="flex items-center gap-2.5 text-slate-500 text-sm">
+                  <svg
+                    className="w-4 h-4 animate-spin"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M14 8A6 6 0 1 1 8 2" strokeLinecap="round" />
+                  </svg>
+                  Loading map
+                </div>
+              </div>
+            ) : (
+              <EarthquakeMap
+                earthquakes={filtered}
+                allEarthquakes={earthquakes}
+                bbox={filters.bbox}
+                onBboxChange={handleBboxChange}
+              />
+            )}
           </div>
-        ) : (
-          <EarthquakeMap earthquakes={earthquakes} />
-        )}
 
-        {/* Charts row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MagnitudeHistogram earthquakes={earthquakes} />
-          <DepthScatter earthquakes={earthquakes} />
+          <div className="xl:col-span-2 flex flex-col gap-4">
+            <MagnitudeHistogram
+              earthquakes={filtered}
+              selectedBin={filters.selectedBin}
+              onBinClick={(bin) => setFilters((f) => ({ ...f, selectedBin: bin }))}
+            />
+            <DepthScatter earthquakes={filtered} />
+          </div>
         </div>
 
         {/* Table */}
-        <EarthquakeTable earthquakes={earthquakes} />
+        <EarthquakeTable earthquakes={filtered} />
 
         {/* Footer */}
-        <footer className="text-center text-xs text-slate-600 pb-4">
-          Data source: INGV FDSN Event API ·{' '}
+        <footer className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-700 py-4 border-t border-slate-800/60">
+          <span>Data: INGV FDSN Event API</span>
+          <span>·</span>
           <a
             href="https://webservices.ingv.it/fdsnws/event/1/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-slate-400"
+            className="hover:text-slate-500 transition-colors underline underline-offset-2"
           >
             webservices.ingv.it
-          </a>{' '}
-          · Stored &amp; served via{' '}
+          </a>
+          <span>·</span>
           <a
             href="https://aka.ms/rayfin"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-slate-400"
+            className="hover:text-slate-500 transition-colors underline underline-offset-2"
           >
             Rayfin
-          </a>{' '}
-          on Microsoft Fabric
+          </a>
+          <span>·</span>
+          <span>Microsoft Fabric</span>
         </footer>
       </main>
     </div>

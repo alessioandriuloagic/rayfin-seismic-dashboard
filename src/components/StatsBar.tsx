@@ -15,97 +15,83 @@ function StatCard({
   label,
   value,
   sub,
-  color = 'indigo',
+  colorClass,
 }: {
   label: string;
   value: string | number;
   sub?: string;
-  color?: 'indigo' | 'amber' | 'red' | 'emerald';
+  colorClass: string;
 }) {
-  const ring: Record<string, string> = {
-    indigo: 'ring-indigo-500/40',
-    amber: 'ring-amber-500/40',
-    red: 'ring-red-500/40',
-    emerald: 'ring-emerald-500/40',
-  };
-  const text: Record<string, string> = {
-    indigo: 'text-indigo-400',
-    amber: 'text-amber-400',
-    red: 'text-red-400',
-    emerald: 'text-emerald-400',
-  };
   return (
-    <div
-      className={`rounded-xl bg-slate-800 ring-1 ${ring[color]} p-4 flex flex-col gap-1`}
-    >
-      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+    <div className="rounded-xl bg-slate-800/70 border border-slate-700/50 p-4 flex flex-col gap-1.5 hover:border-slate-600/70 transition-colors">
+      <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
         {label}
       </span>
-      <span className={`text-3xl font-bold ${text[color]}`}>{value}</span>
-      {sub && <span className="text-xs text-slate-500">{sub}</span>}
+      <span className={`text-3xl font-bold tabular-nums leading-none ${colorClass}`}>
+        {value}
+      </span>
+      {sub && <span className="text-xs text-slate-600">{sub}</span>}
     </div>
   );
 }
 
 export function StatsBar({ earthquakes, syncState, onSyncNow }: StatsBarProps) {
-  const now = Date.now();
-  const oneHourAgo = now - 60 * 60 * 1000;
-
   const total = earthquakes.length;
   const maxMag =
-    earthquakes.length > 0
+    total > 0
       ? Math.max(...earthquakes.map((e) => e.magnitude)).toFixed(1)
       : '—';
   const avgDepth =
-    earthquakes.length > 0
-      ? (
-          earthquakes.reduce((s, e) => s + e.depth, 0) / earthquakes.length
-        ).toFixed(1)
+    total > 0
+      ? (earthquakes.reduce((s, e) => s + e.depth, 0) / total).toFixed(1)
       : '—';
   const lastHour = earthquakes.filter(
-    (e) => new Date(e.time).getTime() > oneHourAgo,
+    (e) => new Date(e.time).getTime() > Date.now() - 3_600_000,
   ).length;
 
+  const maxMagNum = Number(maxMag);
+  const magColorClass =
+    maxMagNum >= 4 ? 'text-red-400' : maxMagNum >= 2.5 ? 'text-orange-400' : 'text-amber-400';
+
   const lastSyncStr = syncState.lastSync
-    ? syncState.lastSync.toLocaleTimeString()
-    : '—';
+    ? syncState.lastSync.toLocaleTimeString('it-IT', { timeStyle: 'short' })
+    : 'Never';
 
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
-          label="Total events (24 h)"
+          label="Events"
           value={total}
-          sub={`${syncState.totalSynced} synced to Rayfin`}
-          color="indigo"
+          sub="within active filters"
+          colorClass="text-indigo-400"
         />
         <StatCard
           label="Max magnitude"
           value={maxMag}
-          sub="last 24 h"
-          color="red"
+          sub="within filter"
+          colorClass={magColorClass}
         />
         <StatCard
           label="Avg depth"
           value={avgDepth !== '—' ? `${avgDepth} km` : '—'}
           sub="hypocentral depth"
-          color="amber"
+          colorClass="text-amber-400"
         />
         <StatCard
-          label="Events last hour"
+          label="Last hour"
           value={lastHour}
           sub="near-realtime count"
-          color="emerald"
+          colorClass="text-emerald-400"
         />
       </div>
 
-      {/* Sync status bar */}
-      <div className="flex items-center justify-between rounded-xl bg-slate-800/50 px-4 py-2 text-xs text-slate-400">
+      <div className="flex items-center justify-between rounded-xl bg-slate-800/50 border border-slate-700/40 px-4 py-2.5 text-xs text-slate-500">
         <span>
-          Last sync:{' '}
-          <span className="text-slate-300 font-medium">{lastSyncStr}</span>
+          Last sync with Fabric:{' '}
+          <span className="text-slate-300 font-semibold">{lastSyncStr}</span>
           {syncState.newCount > 0 && (
-            <span className="ml-2 text-emerald-400">
+            <span className="ml-2 text-emerald-400 font-semibold">
               +{syncState.newCount} new
             </span>
           )}
@@ -113,10 +99,19 @@ export function StatsBar({ earthquakes, syncState, onSyncNow }: StatsBarProps) {
         <button
           onClick={onSyncNow}
           disabled={syncState.syncing}
-          className="flex items-center gap-1 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 px-3 py-1 transition text-slate-200 font-medium"
+          className="flex items-center gap-1.5 rounded-lg bg-slate-700/80 hover:bg-slate-700 border border-slate-600/60 disabled:opacity-40 px-3 py-1 transition-all text-slate-300 font-semibold"
         >
-          <span className={syncState.syncing ? 'animate-spin' : ''}>⟳</span>
-          {syncState.syncing ? 'Syncing…' : 'Sync now'}
+          <svg
+            className={`w-3.5 h-3.5 ${syncState.syncing ? 'animate-spin' : ''}`}
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M14 8A6 6 0 1 1 8 2" strokeLinecap="round" />
+            <path d="M10.5 2.5l-2-1 1 2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {syncState.syncing ? 'Syncing' : 'Sync now'}
         </button>
       </div>
     </div>
