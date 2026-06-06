@@ -1,0 +1,15 @@
+{
+  "deployments": {
+    "ws-fabric-deploy": {
+      "fabricItemId": "92576dfb-40aa-461b-b9b5-2640acf20681",
+      "fabricApiUrl": "https://westeurope.pbidedicated.windows.net/webapi/capacities/8626d394-40c1-4872-a1f1-25b8cfcbf6ad/workloads/BaaS/BaaSService/automatic/v1/workspaces/22591ff4-22cf-4854-b02d-e2a68fa84ce2/appbackends/92576dfb-40aa-461b-b9b5-2640acf20681",
+      "fabricWorkspaceId": "22591ff4-22cf-4854-b02d-e2a68fa84ce2",
+      "fabricTenantId": "1cf6db06-3e00-48b6-a65c-be932526610e",
+      "publishableKey": "pk-hJ9Xt7GWwAy7855hu0Bq",
+      "hostingUrl": "https://fond-poppy-fcf5574772-westeurope.webapp.fabricapps.net",
+      "fabricDeepLink": "https://app.fabric.microsoft.com/groups/22591ff4-22cf-4854-b02d-e2a68fa84ce2/appbackends/92576dfb-40aa-461b-b9b5-2640acf20681?ctid=1cf6db06-3e00-48b6-a65c-be932526610e",
+      "deployedAt": "2026-06-06T16:24:13.739Z"
+    }
+  },
+  "active": "ws-fabric-deploy"
+}

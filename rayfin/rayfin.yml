@@ -1,7 +1,6 @@
 id: seismic-dashboard
 name: Seismic Dashboard
 version: 0.1.0
-
 services:
   auth:
     enabled: true
@@ -11,10 +10,11 @@ services:
     allowedRedirectUris:
       - http://localhost:5173
       - http://localhost:5173/auth/callback
+      - https://fond-poppy-fcf5574772-westeurope.webapp.fabricapps.net
     fabric:
       enabled: true
     password:
-      enabled: true   # Local development only
+      enabled: true
   data:
     enabled: true
     dialect: mssql
@@ -26,3 +26,5 @@ services:
     folder: dist
     buildCommand: npm run build
     indexDocument: index.html
+  functions:
+    enabled: false
