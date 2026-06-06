@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Rayfin generated artifacts
+rayfin/.temp/
+
+# Rayfin deployment env files (contain workspace IDs — keep private if needed)
+.env
+.env.local
+.env.fabric
+.env.fabric-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
