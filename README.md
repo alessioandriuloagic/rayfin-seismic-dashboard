@@ -5,6 +5,10 @@ A **near-realtime earthquake dashboard for Italy**, built as a demo for [Rayfin]
 > **Purpose:** Explore Rayfin's capabilities by building a real data pipeline:  
 > INGV FDSN API (seismic data) → Rayfin entity (SQL on Fabric) → React dashboard
 
+> ✅ **Status:** Deployed and tested on Microsoft Fabric.  
+> **Live app:** [fond-poppy-fcf5574772-westeurope.webapp.fabricapps.net](https://fond-poppy-fcf5574772-westeurope.webapp.fabricapps.net)  
+> **Workspace:** `ws_fabric_deploy`
+
 ![Dashboard screenshot placeholder](docs/screenshot.png)
 
 ---
@@ -122,6 +126,9 @@ After `rayfin up` completes, the CLI prints:
 - **Portal link** — manage the Fabric App item in the portal
 - **Deployment ID** — for reference
 
+> **Tested with:** `npx rayfin up --workspace ws_fabric_deploy`  
+> Deployed to West Europe region at `fond-poppy-fcf5574772-westeurope.webapp.fabricapps.net`.
+
 ---
 
 ## Available scripts
@@ -198,6 +205,19 @@ This approach:
 - [Rayfin documentation](https://aka.ms/rayfin/docs)
 - [Fabric Apps overview](https://learn.microsoft.com/en-us/fabric/apps/overview)
 - [INGV FDSN Event API](https://webservices.ingv.it/fdsnws/event/1/)
+
+---
+
+## Deployment notes
+
+| | |
+|---|---|
+| **Workspace** | `ws_fabric_deploy` |
+| **Region** | West Europe |
+| **App URL** | https://fond-poppy-fcf5574772-westeurope.webapp.fabricapps.net |
+| **Auth modes tested** | Fabric SSO (production), email/password (local Docker) |
+| **Rayfin CLI command** | `npx rayfin up --workspace ws_fabric_deploy` |
+| **Last tested** | 2026-06-06 |
 - [awesome-rayfin templates](https://github.com/microsoft/awesome-rayfin)
 
 ---
